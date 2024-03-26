@@ -16,12 +16,15 @@ import plotly.express as px
 from shinywidgets import render_plotly
 from scipy import stats
 
+
+
 # --------------------------------------------
 # Import icons as you like
 # --------------------------------------------
 
 # https://fontawesome.com/v4/cheatsheet/
 from faicons import icon_svg
+
 
 # --------------------------------------------
 # Shiny EXPRESS VERSION
@@ -33,7 +36,7 @@ from faicons import icon_svg
 # Use a type hint to make it clear that it's an integer (: int)
 # --------------------------------------------
 
-UPDATE_INTERVAL_SECS: int = 3
+UPDATE_INTERVAL_SECS: int = 5
 
 # --------------------------------------------
 # Initialize a REACTIVE VALUE with a common data structure
@@ -45,6 +48,7 @@ UPDATE_INTERVAL_SECS: int = 3
 DEQUE_SIZE: int = 5
 reactive_value_wrapper = reactive.value(deque(maxlen=DEQUE_SIZE))
 
+MAX_DEQUE_SIZE = 20
 # --------------------------------------------
 # Initialize a REACTIVE CALC that all display components can call
 # to get the latest data and display it.
@@ -61,7 +65,7 @@ def reactive_calc_combined():
     reactive.invalidate_later(UPDATE_INTERVAL_SECS)
 
     # Data generation logic
-    temp = round(random.uniform(-18, -16), 1)
+    temp = round(random.uniform(0, 70), 1)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_dictionary_entry = {"temp":temp, "timestamp":timestamp}
 
@@ -88,28 +92,30 @@ def reactive_calc_combined():
 # Call the ui.page_opts() function
 # Set title to a string in quotes that will appear at the top
 # Set fillable to True to use the whole page width for the UI
-ui.page_opts(title="PyShiny Express: Live Data Example", fillable=True)
+ui.page_opts(title="Brennan's Weather Example", fillable=True)
 
 # Sidebar is typically used for user interaction/information
 # Note the with statement to create the sidebar followed by a colon
 # Everything in the sidebar is indented consistently
 with ui.sidebar(open="open"):
 
-    ui.h2("Antarctic Explorer", class_="text-center")
+    ui.h1("Maryville in March", class_="text-center", style="color:blue")
     ui.p(
-        "A demonstration of real-time temperature readings in Antarctica.",
-        class_="text-center",
+        "A demonstration of real-time temperature readings in Maryville.",
+        class_="text-center", style="color:green",
     )
+
     ui.hr()
-    ui.h6("Links:")
+
+    ui.h3("Links:", style="text-decoration: underline")
     ui.a(
-        "GitHub Source",
-        href="https://github.com/denisecase/cintel-05-cintel",
+        "GitHub Source - Lehman",
+        href="https://github.com/Brennanlehman/cintel-05-cintel",
         target="_blank",
     )
     ui.a(
-        "GitHub App",
-        href="https://denisecase.github.io/cintel-05-cintel/",
+        "GitHub App - Lehman",
+        href="https://brennanlehman.github.io/cintel-05-cintel/",
         target="_blank",
     )
     ui.a("PyShiny", href="https://shiny.posit.co/py/", target="_blank")
@@ -123,8 +129,8 @@ with ui.sidebar(open="open"):
 
 with ui.layout_columns():
     with ui.value_box(
-        showcase=icon_svg("sun"),
-        theme="bg-gradient-blue-purple",
+        showcase=icon_svg("bolt"),
+        theme="danger",
     ):
 
         "Current Temperature"
@@ -133,24 +139,26 @@ with ui.layout_columns():
         def display_temp():
             """Get the latest reading and return a temperature string"""
             deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
-            return f"{latest_dictionary_entry['temp']} C"
+            return f"{latest_dictionary_entry['temp']} F"
 
-        "warmer than usual"
+        ui.h1("SEVERE WEATHER ALERT!", style="font-weight:bold")
 
   
 
-    with ui.card(full_screen=True):
+    with ui.card(full_screen=True, style="background-color: lightgray;"):
         ui.card_header("Current Date and Time")
-
+        
+       
         @render.text
         def display_time():
             """Get the latest reading and return a timestamp string"""
             deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
             return f"{latest_dictionary_entry['timestamp']}"
+            
 
 
-#with ui.card(full_screen=True, min_height="40%"):
-with ui.card(full_screen=True):
+#with ui.card(full_screen=True, min_height="100%"):
+with ui.card(full_screen=True, style="background-color: lightgray;", height=350):
     ui.card_header("Most Recent Readings")
 
     @render.data_frame
@@ -158,10 +166,10 @@ with ui.card(full_screen=True):
         """Get the latest reading and return a dataframe with current readings"""
         deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
         pd.set_option('display.width', None)        # Use maximum width
-        return render.DataGrid( df,width="100%")
+        return render.DataGrid(df, width="100%", height="100%")
 
 with ui.card():
-    ui.card_header("Chart with Current Trend")
+    ui.card_header("Chart with Current Trend", style="background-color: lightgray; width: 100%;")
 
     @render_plotly
     def display_plot():
@@ -181,7 +189,7 @@ with ui.card():
             x="timestamp",
             y="temp",
             title="Temperature Readings with Regression Line",
-            labels={"temp": "Temperature (°C)", "timestamp": "Time"},
+            labels={"temp": "Temperature (°F)", "timestamp": "Time"},
             color_discrete_sequence=["blue"] )
             
             # Linear regression - we need to get a list of the
@@ -201,6 +209,6 @@ with ui.card():
             fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
 
             # Update layout as needed to customize further
-            fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)")
+            fig.update_layout(xaxis_title="Time", yaxis_title="Temperature (°F)", yaxis_range=[0, 100])
 
         return fig
