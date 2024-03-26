@@ -204,5 +204,3 @@ with ui.card():
             fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)")
 
         return fig
-
-
