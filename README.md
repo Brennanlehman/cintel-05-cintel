@@ -37,15 +37,28 @@ py -m pip install -r requirements.txt
 py -m pip freeze > requirements.txt
 ```
 
-# Start Project
+# Run Locally - Subsequent Starts
 
-### Build Client Side APP
+Open a terminal (VS Code menu "View" / "Terminal") in the root project folder and run these commands.
+
 ```shell
-shiny static-assets remove
-shinylive export penguins docs
+.venv\Scripts\Activate
+shiny run --reload --launch-browser dashboard/app.py
 ```
 
+## After Changes, Export to Docs Folder
+
+Export to docs folder and test GitHub Pages locally.
+
+Open a browser to <http://[::1]:8008/> and test the Pages app.
+
+Export to docs folder and test GitHub Pages locally.
+
+Open a terminal (VS Code menu "Terminal" / "New Terminal") in the root project folder and run these commands.
+
 ```shell
+shiny static-assets remove
+shinylive export dashboard docs
 py -m http.server --directory docs --bind localhost 8008
 ```
 
@@ -57,3 +70,6 @@ git commit -m "add .gitignore, cmds to readme"
 git push origin main
 ```
 
+## Enable GitHub Pages
+
+Go to your GitHub repo settings and enable GitHub Pages for the docs folder.
